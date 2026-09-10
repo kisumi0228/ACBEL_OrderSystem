@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>訂單管理系統</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Microsoft JhengHei", "Segoe UI", sans-serif;
+    background: #f2f4f7;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* ---------- 登入頁 ---------- */
+  #loginPage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+  #loginBox {
+    background: #fff;
+    padding: 40px 36px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    width: 320px;
+  }
+  #loginLogo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  #loginLogo img { height: 40px; display: none; }
+  #loginLogo .logoText {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #d93025;
+  }
+  #loginLogo .logoText span { color: #2d2d2d; }
+  #loginBox h1 {
+    font-size: 15px;
+    margin: 0 0 24px;
+    text-align: center;
+    color: #888;
+    font-weight: 400;
+  }
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 6px;
+  }
+  .field input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  #loginBtn {
+    width: 100%;
+    padding: 10px;
+    background: #2d6cdf;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  #loginBtn:hover { background: #1f56bd; }
+  #loginError {
+    color: #d93025;
+    font-size: 13px;
+    margin-top: 10px;
+    min-height: 16px;
+    text-align: center;
+  }
+  #loginHint {
+    text-align: center;
+    font-size: 12px;
+    color: #999;
+    margin-top: 18px;
+  }
+  .switchLink {
+    text-align: center;
+    font-size: 13px;
+    margin-top: 16px;
+  }
+  .switchLink a {
+    color: #2d6cdf;
+    text-decoration: none;
+  }
+  .switchLink a:hover { text-decoration: underline; }
+  #registerError {
+    color: #d93025;
+    font-size: 13px;
+    margin-top: 10px;
+    min-height: 16px;
+    text-align: center;
+  }
+  #registerSuccess {
+    color: #1e8a3c;
+    font-size: 13px;
+    margin-top: 6px;
+    min-height: 16px;
+    text-align: center;
+  }
+
+  /* ---------- 訂單管理頁 ---------- */
+  #mainPage { display: none; padding: 24px 32px; }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  header h1 { font-size: 22px; color: #222; margin: 0; }
+  .headerRight {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  #currentUserLabel {
+    font-size: 13px;
+    color: #666;
+    background: #f0f2f5;
+    padding: 6px 12px;
+    border-radius: 14px;
+  }
+  #headerLogo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #headerLogo img { height: 30px; display: none; }
+  #headerLogo .logoText {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #d93025;
+  }
+  #headerLogo .logoText span { color: #2d2d2d; }
+  #headerLogo .divider {
+    width: 1px;
+    height: 22px;
+    background: #ddd;
+  }
+  #logoutBtn {
+    padding: 8px 16px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  #logoutBtn:hover { background: #f0f0f0; }
+
+  #formCard {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  #formCard h2 { font-size: 16px; margin: 0 0 16px; color: #333; }
+  .formGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .formGrid .field { margin-bottom: 0; }
+  .formGrid input, .formGrid select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  #addOrderBtn {
+    margin-top: 16px;
+    padding: 9px 22px;
+    background: #2d6cdf;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  #addOrderBtn:hover { background: #1f56bd; }
+  #formError {
+    color: #d93025;
+    font-size: 13px;
+    margin-top: 8px;
+    min-height: 16px;
+  }
+
+  #toolbarCard {
+    background: #fff;
+    border-radius: 8px;
+    padding: 16px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  #toolbarCard .left, #toolbarCard .right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .toolBtn {
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .toolBtn:hover { background: #f0f0f0; }
+  #exportBtn:hover { background: #e3f7e8; border-color: #1e8a3c; }
+  #importBtn:hover { background: #e5f0ff; border-color: #2d6cdf; }
+  #batchDeleteBtn { color: #c0392b; }
+  #batchDeleteBtn:hover { background: #fde8e8; border-color: #d93025; }
+  #batchDeleteBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+  #importFileInput { display: none; }
+  #selectedCount { font-size: 13px; color: #666; }
+  #importMsg { font-size: 12px; color: #1e8a3c; }
+
+  #tableCard {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  #tableCard h2 { font-size: 16px; margin: 0 0 16px; color: #333; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td {
+    padding: 10px 8px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+  th { color: #666; font-weight: 600; background: #fafafa; }
+  tr:hover { background: #f7f9fc; }
+  .statusTag {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+  }
+  .status-待處理 { background: #fff4e5; color: #b26a00; }
+  .status-處理中 { background: #e5f0ff; color: #1a56c4; }
+  .status-已完成 { background: #e3f7e8; color: #1e8a3c; }
+  .status-已取消 { background: #fde8e8; color: #c0392b; }
+  .actionBtn {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 12px;
+    margin-right: 4px;
+  }
+  .editBtn:hover { background: #e5f0ff; border-color: #2d6cdf; }
+  .deleteBtn:hover { background: #fde8e8; border-color: #d93025; }
+  #emptyRow { text-align: center; color: #999; padding: 24px; }
+  .rowCheck, #selectAllCheck { width: 16px; height: 16px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- ================= 登入頁 ================= -->
+<div id="loginPage">
+  <div id="loginBox">
+    <div id="loginLogo">
+      <img src="acbel_logo.png" alt="ACBEL logo" id="loginLogoImg">
+      <div class="logoText" id="loginLogoText">AC<span>BEL</span></div>
+    </div>
+
+    <div id="loginFormBox">
+      <h1>訂單管理系統 - 登入</h1>
+      <div class="field">
+        <label for="username">帳號</label>
+        <input type="text" id="username" placeholder="請輸入帳號" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="password">密碼</label>
+        <input type="password" id="password" placeholder="請輸入密碼" autocomplete="off">
+      </div>
+      <button id="loginBtn">登入</button>
+      <div id="loginError"></div>
+      <div id="loginHint">測試帳密：acbel / acbel</div>
+      <div class="switchLink"><a href="#" id="showRegisterLink">還沒有帳號？建立新帳號</a></div>
+    </div>
+
+    <div id="registerFormBox" style="display:none;">
+      <h1>建立新帳號</h1>
+      <div class="field">
+        <label for="regUsername">帳號</label>
+        <input type="text" id="regUsername" placeholder="設定新帳號" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="regPassword">密碼</label>
+        <input type="password" id="regPassword" placeholder="設定密碼" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="regPasswordConfirm">確認密碼</label>
+        <input type="password" id="regPasswordConfirm" placeholder="再次輸入密碼" autocomplete="off">
+      </div>
+      <button id="registerBtn">建立帳號</button>
+      <div id="registerError"></div>
+      <div id="registerSuccess"></div>
+      <div class="switchLink"><a href="#" id="showLoginLink">已經有帳號？返回登入</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 訂單管理頁 ================= -->
+<div id="mainPage">
+  <header>
+    <div id="headerLogo">
+      <img src="acbel_logo.png" alt="ACBEL logo" id="headerLogoImg">
+      <div class="logoText" id="headerLogoText">AC<span>BEL</span></div>
+      <div class="divider"></div>
+      <h1>訂單管理系統</h1>
+    </div>
+    <div class="headerRight">
+      <span id="currentUserLabel"></span>
+      <button id="logoutBtn">登出</button>
+    </div>
+  </header>
+
+  <div id="formCard">
+    <h2>新增訂單</h2>
+    <div class="formGrid">
+      <div class="field">
+        <label for="orderId">訂單編號</label>
+        <input type="text" id="orderId" placeholder="例如 ORD001">
+      </div>
+      <div class="field">
+        <label for="customerName">客戶名稱</label>
+        <input type="text" id="customerName" placeholder="請輸入客戶名稱">
+      </div>
+      <div class="field">
+        <label for="productName">商品名稱</label>
+        <input type="text" id="productName" placeholder="請輸入商品名稱">
+      </div>
+      <div class="field">
+        <label for="quantity">數量</label>
+        <input type="number" id="quantity" min="1" placeholder="數量">
+      </div>
+      <div class="field">
+        <label for="amount">金額</label>
+        <input type="number" id="amount" min="0" placeholder="金額">
+      </div>
+      <div class="field">
+        <label for="status">狀態</label>
+        <select id="status">
+          <option value="待處理">待處理</option>
+          <option value="處理中">處理中</option>
+          <option value="已完成">已完成</option>
+          <option value="已取消">已取消</option>
+        </select>
+      </div>
+    </div>
+    <button id="addOrderBtn">新增訂單</button>
+    <div id="formError"></div>
+  </div>
+
+  <div id="toolbarCard">
+    <div class="left">
+      <button class="toolBtn" id="exportBtn">匯出 Excel (CSV)</button>
+      <button class="toolBtn" id="importBtn">批次匯入 (CSV)</button>
+      <input type="file" id="importFileInput" accept=".csv">
+      <span id="importMsg"></span>
+    </div>
+    <div class="right">
+      <span id="selectedCount">已選取 0 筆</span>
+      <button class="toolBtn" id="batchDeleteBtn" disabled>刪除已選取</button>
+    </div>
+  </div>
+
+  <div id="tableCard">
+    <h2>訂單列表</h2>
+    <table>
+      <thead>
+        <tr>
+          <th><input type="checkbox" id="selectAllCheck"></th>
+          <th>訂單編號</th>
+          <th>客戶名稱</th>
+          <th>商品名稱</th>
+          <th>數量</th>
+          <th>金額</th>
+          <th>狀態</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="orderTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // 若同目錄下放有 acbel_logo.png，會自動改用圖片 logo；否則顯示文字版 logo
+  function trySwapLogo(imgId, textId) {
+    var img = document.getElementById(imgId);
+    img.onload = function() {
+      img.style.display = "inline-block";
+      document.getElementById(textId).style.display = "none";
+    };
+    img.onerror = function() {
+      img.style.display = "none";
+    };
+  }
+  trySwapLogo("loginLogoImg", "loginLogoText");
+  trySwapLogo("headerLogoImg", "headerLogoText");
+
+  var ACCOUNTS_KEY = "orderApp_accounts";
+  var ORDERS_KEY_PREFIX = "orderApp_orders_";
+
+  // ---------- 帳號資料存取（localStorage） ----------
+  function loadAccounts() {
+    var raw = localStorage.getItem(ACCOUNTS_KEY);
+    if (!raw) {
+      var seed = { "acbel": "acbel" };
+      localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(seed));
+      return seed;
+    }
+    try { return JSON.parse(raw); } catch (e) { return { "acbel": "acbel" }; }
+  }
+
+  function saveAccounts(accounts) {
+    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+  }
+
+  // ---------- 各帳號的訂單資料存取（彼此獨立） ----------
+  function loadOrdersFor(username) {
+    var raw = localStorage.getItem(ORDERS_KEY_PREFIX + username);
+    if (raw) {
+      try { return JSON.parse(raw); } catch (e) { /* fallthrough */ }
+    }
+    // 內建示範帳號 acbel 第一次登入時給予範例資料，其餘新帳號一律從空清單開始
+    var initial = (username === "acbel") ? [
+      { id: "ORD001", customer: "王小明", product: "無線滑鼠", qty: 2, amount: 600, status: "待處理" },
+      { id: "ORD002", customer: "陳美麗", product: "機械鍵盤", qty: 1, amount: 1500, status: "處理中" },
+      { id: "ORD003", customer: "林大同", product: "27吋顯示器", qty: 1, amount: 5200, status: "已完成" }
+    ] : [];
+    saveOrdersFor(username, initial);
+    return initial;
+  }
+
+  function saveOrdersFor(username, list) {
+    localStorage.setItem(ORDERS_KEY_PREFIX + username, JSON.stringify(list));
+  }
+
+  function persistOrders() {
+    if (currentUser) saveOrdersFor(currentUser, orders);
+  }
+
+  var currentUser = null;
+  var orders = [];
+  var editingId = null;
+  var selectedIds = {};
+
+  // ---------- 登入 / 註冊 切換 ----------
+  document.getElementById("showRegisterLink").addEventListener("click", function(e) {
+    e.preventDefault();
+    document.getElementById("loginFormBox").style.display = "none";
+    document.getElementById("registerFormBox").style.display = "block";
+    document.getElementById("loginError").textContent = "";
+  });
+
+  document.getElementById("showLoginLink").addEventListener("click", function(e) {
+    e.preventDefault();
+    document.getElementById("registerFormBox").style.display = "none";
+    document.getElementById("loginFormBox").style.display = "block";
+    document.getElementById("registerError").textContent = "";
+    document.getElementById("registerSuccess").textContent = "";
+  });
+
+  // ---------- 登入邏輯 ----------
+  document.getElementById("loginBtn").addEventListener("click", doLogin);
+  document.getElementById("password").addEventListener("keydown", function(e){
+    if (e.key === "Enter") doLogin();
+  });
+
+  function doLogin() {
+    var user = document.getElementById("username").value.trim();
+    var pass = document.getElementById("password").value.trim();
+    var errorBox = document.getElementById("loginError");
+
+    if (!user || !pass) {
+      errorBox.textContent = "請輸入帳號與密碼";
+      return;
+    }
+
+    var accounts = loadAccounts();
+    if (accounts.hasOwnProperty(user) && accounts[user] === pass) {
+      errorBox.textContent = "";
+      currentUser = user;
+      orders = loadOrdersFor(currentUser);
+      document.getElementById("currentUserLabel").textContent = "已登入：" + currentUser;
+      document.getElementById("loginPage").style.display = "none";
+      document.getElementById("mainPage").style.display = "block";
+      renderOrders();
+    } else {
+      errorBox.textContent = "帳號或密碼錯誤";
+    }
+  }
+
+  // ---------- 註冊邏輯 ----------
+  document.getElementById("registerBtn").addEventListener("click", function() {
+    var regUser = document.getElementById("regUsername").value.trim();
+    var regPass = document.getElementById("regPassword").value.trim();
+    var regPassConfirm = document.getElementById("regPasswordConfirm").value.trim();
+    var errorBox = document.getElementById("registerError");
+    var successBox = document.getElementById("registerSuccess");
+    successBox.textContent = "";
+
+    if (!regUser || !regPass || !regPassConfirm) {
+      errorBox.textContent = "請完整填寫所有欄位";
+      return;
+    }
+    if (regPass !== regPassConfirm) {
+      errorBox.textContent = "兩次輸入的密碼不一致";
+      return;
+    }
+
+    var accounts = loadAccounts();
+    if (accounts.hasOwnProperty(regUser)) {
+      errorBox.textContent = "此帳號已被使用，請換一個帳號名稱";
+      return;
+    }
+
+    accounts[regUser] = regPass;
+    saveAccounts(accounts);
+    loadOrdersFor(regUser); // 建立此帳號專屬、空白的訂單清單
+
+    errorBox.textContent = "";
+    successBox.textContent = "帳號建立成功，請返回登入";
+    document.getElementById("regUsername").value = "";
+    document.getElementById("regPassword").value = "";
+    document.getElementById("regPasswordConfirm").value = "";
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", function() {
+    document.getElementById("mainPage").style.display = "none";
+    document.getElementById("loginPage").style.display = "flex";
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("loginError").textContent = "";
+    document.getElementById("registerFormBox").style.display = "none";
+    document.getElementById("loginFormBox").style.display = "block";
+    currentUser = null;
+    orders = [];
+    editingId = null;
+    selectedIds = {};
+  });
+
+  // ---------- 新增 / 編輯訂單 ----------
+  document.getElementById("addOrderBtn").addEventListener("click", function() {
+    var idInput = document.getElementById("orderId");
+    var customerInput = document.getElementById("customerName");
+    var productInput = document.getElementById("productName");
+    var qtyInput = document.getElementById("quantity");
+    var amountInput = document.getElementById("amount");
+    var statusInput = document.getElementById("status");
+    var errorBox = document.getElementById("formError");
+
+    var id = idInput.value.trim();
+    var customer = customerInput.value.trim();
+    var product = productInput.value.trim();
+    var qty = qtyInput.value;
+    var amount = amountInput.value;
+    var status = statusInput.value;
+
+    if (!id || !customer || !product || !qty || !amount) {
+      errorBox.textContent = "請完整填寫所有欄位";
+      return;
+    }
+
+    if (Number(qty) <= 0 || Number(amount) <= 0) {
+      errorBox.textContent = "數量與金額須為大於 0 的正數";
+      return;
+    }
+
+    if (editingId === null) {
+      var exists = orders.some(function(o){ return o.id === id; });
+      if (exists) {
+        errorBox.textContent = "此訂單編號已存在";
+        return;
+      }
+      orders.push({
+        id: id, customer: customer, product: product,
+        qty: Number(qty), amount: Number(amount), status: status
+      });
+    } else {
+      var target = orders.find(function(o){ return o.id === editingId; });
+      if (!target) {
+        errorBox.textContent = "此筆資料已被刪除，請重新輸入";
+        resetForm();
+        renderOrders();
+        return;
+      }
+      target.id = id;
+      target.customer = customer;
+      target.product = product;
+      target.qty = Number(qty);
+      target.amount = Number(amount);
+      target.status = status;
+      editingId = null;
+      document.getElementById("addOrderBtn").textContent = "新增訂單";
+    }
+
+    errorBox.textContent = "";
+    idInput.value = "";
+    customerInput.value = "";
+    productInput.value = "";
+    qtyInput.value = "";
+    amountInput.value = "";
+    statusInput.value = "待處理";
+
+    persistOrders();
+    renderOrders();
+  });
+
+  // ---------- 匯出 CSV ----------
+  document.getElementById("exportBtn").addEventListener("click", function() {
+    var header = ["訂單編號", "客戶名稱", "商品名稱", "數量", "金額", "狀態"];
+    var rows = orders.map(function(o) {
+      return [o.id, o.customer, o.product, o.qty, o.amount, o.status];
+    });
+    var csv = "\uFEFF" + header.join(",") + "\r\n" +
+      rows.map(function(r){ return r.join(","); }).join("\r\n");
+    var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "orders_export.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  // ---------- 批次匯入 CSV ----------
+  document.getElementById("importBtn").addEventListener("click", function() {
+    document.getElementById("importFileInput").click();
+  });
+
+  document.getElementById("importFileInput").addEventListener("change", function(e) {
+    var file = e.target.files[0];
+    var msgBox = document.getElementById("importMsg");
+    if (!file) return;
+
+    var reader = new FileReader();
+    reader.onload = function(evt) {
+      var text = evt.target.result.replace(/^\uFEFF/, "");
+      var lines = text.split(/\r?\n/).filter(function(l){ return l.trim() !== ""; });
+      if (lines.length < 2) {
+        msgBox.style.color = "#d93025";
+        msgBox.textContent = "檔案沒有資料列";
+        return;
+      }
+      var added = 0, skipped = 0;
+      for (var i = 1; i < lines.length; i++) {
+        var cols = lines[i].split(",");
+        if (cols.length < 6) { skipped++; continue; }
+        var id = cols[0].trim();
+        if (!id || orders.some(function(o){ return o.id === id; })) { skipped++; continue; }
+        orders.push({
+          id: id,
+          customer: cols[1].trim(),
+          product: cols[2].trim(),
+          qty: Number(cols[3]) || 0,
+          amount: Number(cols[4]) || 0,
+          status: cols[5].trim() || "待處理"
+        });
+        added++;
+      }
+      renderOrders();
+      persistOrders();
+      msgBox.style.color = "#1e8a3c";
+      msgBox.textContent = "已匯入 " + added + " 筆" + (skipped ? "，略過 " + skipped + " 筆" : "");
+      document.getElementById("importFileInput").value = "";
+    };
+    reader.readAsText(file, "UTF-8");
+  });
+
+  // ---------- 多選刪除 ----------
+  document.getElementById("selectAllCheck").addEventListener("change", function(e) {
+    var checked = e.target.checked;
+    orders.forEach(function(o) {
+      if (checked) selectedIds[o.id] = true; else delete selectedIds[o.id];
+    });
+    renderOrders();
+  });
+
+  function resetForm() {
+    document.getElementById("orderId").value = "";
+    document.getElementById("customerName").value = "";
+    document.getElementById("productName").value = "";
+    document.getElementById("quantity").value = "";
+    document.getElementById("amount").value = "";
+    document.getElementById("status").value = "待處理";
+    document.getElementById("formError").textContent = "";
+    editingId = null;
+    document.getElementById("addOrderBtn").textContent = "新增訂單";
+  }
+
+  document.getElementById("batchDeleteBtn").addEventListener("click", function() {
+    var ids = Object.keys(selectedIds);
+    if (ids.length === 0) return;
+    if (editingId !== null && selectedIds[editingId]) {
+      resetForm();
+    }
+    orders = orders.filter(function(o){ return !selectedIds[o.id]; });
+    selectedIds = {};
+    persistOrders();
+    renderOrders();
+  });
+
+  function updateSelectedUI() {
+    var count = Object.keys(selectedIds).length;
+    document.getElementById("selectedCount").textContent = "已選取 " + count + " 筆";
+    document.getElementById("batchDeleteBtn").disabled = count === 0;
+    var allChecked = orders.length > 0 && orders.every(function(o){ return selectedIds[o.id]; });
+    document.getElementById("selectAllCheck").checked = allChecked;
+  }
+
+  function renderOrders() {
+    var tbody = document.getElementById("orderTableBody");
+    tbody.innerHTML = "";
+
+    if (orders.length === 0) {
+      var tr = document.createElement("tr");
+      tr.innerHTML = '<td id="emptyRow" colspan="8">目前尚無訂單資料</td>';
+      tbody.appendChild(tr);
+      updateSelectedUI();
+      return;
+    }
+
+    orders.forEach(function(o) {
+      var tr = document.createElement("tr");
+      tr.setAttribute("data-id", o.id);
+      var checked = selectedIds[o.id] ? "checked" : "";
+      tr.innerHTML =
+        '<td><input type="checkbox" class="rowCheck" data-id="' + o.id + '" ' + checked + '></td>' +
+        "<td>" + o.id + "</td>" +
+        "<td>" + o.customer + "</td>" +
+        "<td>" + o.product + "</td>" +
+        "<td>" + o.qty + "</td>" +
+        "<td>" + o.amount.toLocaleString() + "</td>" +
+        '<td><span class="statusTag status-' + o.status + '">' + o.status + "</span></td>" +
+        '<td><button class="actionBtn editBtn" data-id="' + o.id + '">編輯</button>' +
+        '<button class="actionBtn deleteBtn" data-id="' + o.id + '">刪除</button></td>';
+      tbody.appendChild(tr);
+    });
+
+    document.querySelectorAll(".rowCheck").forEach(function(cb) {
+      cb.addEventListener("change", function() {
+        var id = cb.getAttribute("data-id");
+        if (cb.checked) selectedIds[id] = true; else delete selectedIds[id];
+        updateSelectedUI();
+      });
+    });
+
+    document.querySelectorAll(".editBtn").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var id = btn.getAttribute("data-id");
+        var o = orders.find(function(x){ return x.id === id; });
+        document.getElementById("orderId").value = o.id;
+        document.getElementById("customerName").value = o.customer;
+        document.getElementById("productName").value = o.product;
+        document.getElementById("quantity").value = o.qty;
+        document.getElementById("amount").value = o.amount;
+        document.getElementById("status").value = o.status;
+        editingId = o.id;
+        document.getElementById("addOrderBtn").textContent = "更新訂單";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    });
+
+    document.querySelectorAll(".deleteBtn").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var id = btn.getAttribute("data-id");
+        if (editingId === id) {
+          resetForm();
+        }
+        orders = orders.filter(function(o){ return o.id !== id; });
+        delete selectedIds[id];
+        persistOrders();
+        renderOrders();
+      });
+    });
+
+    updateSelectedUI();
+  }
+</script>
+
+</body>
+</html>
